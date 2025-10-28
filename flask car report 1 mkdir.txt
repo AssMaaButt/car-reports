@@ -1,0 +1,47 @@
+flask car report 
+1. mkdir projects
+2. mkdir car_report
+3. cd car_report
+4. git init
+5. python3 -m venve .venv
+6. source .venv/bin/activate
+7. git status 
+8. create readme.md , .gitignore , .env.example echo "# Flask Car Report" > README.md
+
+cat > .gitignore <<'EOF'
+__pycache__/
+instance/
+.env
+app.db
+*.pyc
+.mypy_cache/
+.vscode/
+.venv/
+EOF
+
+cat > .env.example <<'EOF'
+FLASK_DEBUG=True
+SECRET_KEY=dev-secret
+JWT_SECRET_KEY=jwt-secret
+DATABASE_URL=sqlite:///../app.db
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+BACK4APP_APP_ID=gP38fEGPgSSBvvO4Kz9McQD2UpUrcpIlrXDyHLWc
+BACK4APP_REST_KEY=72gJMaTFClPr90oA7bkRYdUy0PJIcKQ8tj8bQvtP
+EOF
+
+
+9. ls -a to see project structure 
+
+Now that your project structure, Git repo, and .env setup are ready, let’s go to :
+
+Step 2: install dependencies.
+1. pip install Flask Flask-JWT-Extended Flask-SQLAlchemy Flask-Marshmallow Flask-Migrate celery redis requests python-dotenv
+
+2. pip freeze > requirements.txt
+3. git add requirements.txt
+4. git config --global user.name "AssMaa Butt"
+git config --global user.email "asma@wanclouds.net"
+5. git commit -m "chore: install Flask and core dependencies"
+
+

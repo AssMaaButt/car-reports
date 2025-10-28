@@ -1,0 +1,8 @@
+__pycache__/
+instance/
+.env
+app.db
+*.pyc
+.mypy_cache/
+.vscode/
+.venv/

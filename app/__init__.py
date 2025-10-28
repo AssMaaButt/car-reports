@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
 from config import Config
 
+
 # Initialize extensions
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -20,12 +21,11 @@ def create_app():
     ma.init_app(app)
 
     # Register blueprints (routes)
-    from app.routes import main_bp
     from app.routes.auth_routes import auth_bp
     from app.routes.car_routes import car_bp
+    from app.routes import main_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(car_bp)
-
 
     return app
