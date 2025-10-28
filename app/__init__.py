@@ -22,7 +22,10 @@ def create_app():
     # Register blueprints (routes)
     from app.routes import main_bp
     from app.routes.auth_routes import auth_bp
+    from app.routes.car_routes import car_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(car_bp)
+
 
     return app
