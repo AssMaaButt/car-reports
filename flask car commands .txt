@@ -31,10 +31,6 @@ BACK4APP_REST_KEY=72gJMaTFClPr90oA7bkRYdUy0PJIcKQ8tj8bQvtP
 EOF
 
 
-9. ls -a to see project structure 
-
-Now that your project structure, Git repo, and .env setup are ready, let’s go to :
-
 Step 2: install dependencies.
 1. pip install Flask Flask-JWT-Extended Flask-SQLAlchemy Flask-Marshmallow Flask-Migrate celery redis requests python-dotenv
 
@@ -43,5 +39,19 @@ Step 2: install dependencies.
 4. git config --global user.name "AssMaa Butt"
 git config --global user.email "asma@wanclouds.net"
 5. git commit -m "chore: install Flask and core dependencies"
+
+step 3: create flask app structure
+1. mkdir app
+2. touch app/__init__.py app/models.py app/routes config.py run.py
+3. touch app/routes/__init__.py app/routes/auth_routes.py app/routes/car_routes.py
+4. Terminal 1:
+      flask run
+5. Terminal 2:
+        sudo systemctl status redis
+        sudo systemctl start redis
+        sudo systemctl enable redis
+6. Terminal 3: 
+        celery -A worker.celery worker --loglevel=info
+
 
 
