@@ -7,7 +7,7 @@
 - Periodic background sync from Back4App (2012-2022) using Celery + Redis.
 
 ## Code structure
-
+'''
 ├── app
 │   ├── __init__.py
 │   ├── models.py
@@ -37,9 +37,7 @@
 ├── requirements.txt
 ├── run.py
 └── worker.py
-
-6 directories, 24 files
-(.venv) asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects/car_report$ 
+'''
 
 ## How to run
 1. Copy .env.example -> .env and update as needed.
