@@ -1,7 +1,7 @@
-# app/routes/auth_routes.py
+# app/web/auth_routes.py
 from flask import Blueprint, request, jsonify
 from .. import db
-from ..models import User
+from app.models import User
 from ..schemas import SignupSchema, LoginSchema
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash

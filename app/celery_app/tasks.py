@@ -4,8 +4,8 @@ import requests
 from datetime import datetime
 from celery import Celery
 from flask import current_app
-from .models import Car
-from . import db
+from ..models.models import Car
+from app import db
 
 def make_celery(app):
     celery = Celery(app.import_name, broker=app.config.get("CELERY_BROKER_URL"), backend=app.config.get("CELERY_RESULT_BACKEND"))

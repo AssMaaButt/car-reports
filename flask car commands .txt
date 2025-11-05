@@ -52,6 +52,8 @@ step 3: create flask app structure
         sudo systemctl enable redis
 6. Terminal 3: 
         celery -A worker.celery worker --loglevel=info
+7. terminal 4 :
+        celery -A worker.celery call sync_from_back4app
 
 
 

@@ -1,8 +1,8 @@
-# app/models.py
+# app/models/models.py
 # SQLAlchemy models: User and Car (normalized)
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from . import db
+from app import db
 
 class User(db.Model):
     __tablename__ = "users"

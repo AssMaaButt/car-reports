@@ -20,10 +20,10 @@ def create_app():
     jwt.init_app(app)
     ma.init_app(app)
 
-    # Register blueprints (routes)
-    from app.routes.auth_routes import auth_bp
-    from app.routes.car_routes import car_bp
-    from app.routes import main_bp
+    # Register blueprints (web)
+    from app.web.auth_routes import auth_bp
+    from app.web.car_routes import car_bp
+    from app.web import main_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(car_bp)

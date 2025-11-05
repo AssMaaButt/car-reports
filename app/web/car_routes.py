@@ -1,9 +1,9 @@
-# app/routes/car_routes.py
+# app/web/car_routes.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from ..models import Car
+from app.models import Car
 from ..schemas import CarSchema
-from .. import db
+from app import db
 
 car_bp = Blueprint("cars", __name__, url_prefix="/cars")
 car_schema = CarSchema()

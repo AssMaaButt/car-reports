@@ -1,5 +1,5 @@
-# app/routes/__init__.py
-# This file marks 'routes' as a Python package.
+# app/web/__init__.py
+# This file marks 'web' as a Python package.
 from .auth_routes import auth_bp
 from .car_routes import car_bp
 from flask import Blueprint, jsonify

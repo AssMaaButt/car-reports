@@ -1,7 +1,7 @@
 # app/schemas.py
 from . import ma
 from marshmallow import fields, validate, validates, ValidationError
-from .models import User, Car
+from .models.models import User, Car
 
 class SignupSchema(ma.Schema):
     username = fields.Str(required=True, validate=validate.Length(min=3))
