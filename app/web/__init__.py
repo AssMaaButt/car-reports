@@ -1,12 +1,13 @@
 # app/web/__init__.py
-# This file marks 'web' as a Python package.
-from .auth_routes import auth_bp
-from .car_routes import car_bp
-from flask import Blueprint, jsonify
+# This file marks 'web' as a Python package and registers blueprints.
 
+from flask import Blueprint, jsonify
+from app.web.users.users_api import users_bp
+from app.web.cars.cars_api import cars_bp
+
+# Optional main blueprint for the root endpoint
 main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/", methods=["GET"])
 def home():
     return jsonify({"message": "Flask app is running successfully!"}), 200
-

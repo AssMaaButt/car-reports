@@ -1,22 +1,28 @@
-# app/web/car_routes.py
+# app/web/cars/cars_api.py
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from app.models import Car
-from ..schemas import CarSchema
+from app.models.car import Car
+from app.web.cars.car_schema import CarSchema
 from app import db
 
-car_bp = Blueprint("cars", __name__, url_prefix="/cars")
+# Blueprint for car-related routes
+cars_bp = Blueprint("cars", __name__, url_prefix="/cars")
+
 car_schema = CarSchema()
 cars_schema = CarSchema(many=True)
 
-@car_bp.route("/", methods=["GET"])
+@cars_bp.route("/", methods=["GET"])
 @jwt_required()
 def list_cars():
-    # Filters
+    """List all cars with filters and pagination"""
     q = Car.query
+
+    # Optional filters
     make = request.args.get("make")
     model = request.args.get("model")
     year = request.args.get("year", type=int)
+
     if make:
         q = q.filter(Car.make.ilike(f"%{make}%"))
     if model:
@@ -29,6 +35,7 @@ def list_cars():
     per_page = request.args.get("per_page", default=20, type=int)
     paginated = q.order_by(Car.year.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
+    # Result structure
     result = {
         "total": paginated.total,
         "page": paginated.page,

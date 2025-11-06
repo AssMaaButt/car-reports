@@ -4,7 +4,6 @@ from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
 from config import Config
 
-
 # Initialize extensions
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -15,17 +14,18 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Initialize extensions with the app
+    # Initialize extensions
     db.init_app(app)
     jwt.init_app(app)
     ma.init_app(app)
 
     # Register blueprints (web)
-    from app.web.auth_routes import auth_bp
-    from app.web.car_routes import car_bp
     from app.web import main_bp
+    from app.web.users.users_api import users_bp
+    from app.web.cars.cars_api import cars_bp
+
     app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(car_bp)
+    app.register_blueprint(users_bp)
+    app.register_blueprint(cars_bp)
 
     return app
