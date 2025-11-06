@@ -1,30 +1,9 @@
-# app/tasks/fetch_and_store_cars.py
-# Celery helper + fetch logic for Back4App dataset
-
+# app/tasks/fetch_and_store_cars_task.py
 import requests
 from datetime import datetime
-from celery import Celery
 from flask import current_app
-from app.models.car import Car   # ✅ updated import path
+from app.models.car import Car
 from app import db
-
-def make_celery(app):
-    """Initialize Celery with Flask app context."""
-    celery = Celery(
-        app.import_name,
-        broker=app.config.get("CELERY_BROKER_URL"),
-        backend=app.config.get("CELERY_RESULT_BACKEND"),
-    )
-    celery.conf.update(app.config)
-
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
-    return celery
-
 
 def fetch_and_store_cars():
     """
@@ -66,7 +45,6 @@ def fetch_and_store_cars():
             except Exception:
                 year = None
 
-            # only keep 2012–2022
             if year and not (2012 <= year <= 2022):
                 continue
 
@@ -92,10 +70,8 @@ def fetch_and_store_cars():
                 total_inserted += 1
 
         db.session.commit()
-
         if len(results) < limit:
             break
-
         skip += limit
 
     app.logger.info("fetch_and_store_cars: inserted=%d", total_inserted)

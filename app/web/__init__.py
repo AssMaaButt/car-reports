@@ -2,8 +2,8 @@
 # This file marks 'web' as a Python package and registers blueprints.
 
 from flask import Blueprint, jsonify
-from app.web.users.users_api import users_bp
-from app.web.cars.cars_api import cars_bp
+from app.web.users.api import users_bp
+from app.web.cars.api import cars_bp
 
 # Optional main blueprint for the root endpoint
 main_bp = Blueprint("main", __name__)

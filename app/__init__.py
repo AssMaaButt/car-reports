@@ -21,8 +21,8 @@ def create_app():
 
     # Register blueprints (web)
     from app.web import main_bp
-    from app.web.users.users_api import users_bp
-    from app.web.cars.cars_api import cars_bp
+    from app.web.users.api import users_bp
+    from app.web.cars.api import cars_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(users_bp)

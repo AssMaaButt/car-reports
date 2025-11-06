@@ -3,7 +3,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from app.models.car import Car
-from app.web.cars.car_schema import CarSchema
+from app.web.cars.schemas import CarSchema
 from app import db
 
 # Blueprint for car-related routes
