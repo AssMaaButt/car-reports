@@ -67,7 +67,9 @@ asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects$ tree -L 4
 2. Start Redis.
 3. Activate venv, install requirements.
 4. Run Flask: `python run.py`
-5. Start Celery worker : `celery -A worker.celery worker --beat --loglevel=info`
+5. **Start Celery worker**  
+   ```bash
+   celery -A worker.celery worker --beat --loglevel=info
 
 ## Docker Setup for Car Report Project
 1. Install docker desktop 
