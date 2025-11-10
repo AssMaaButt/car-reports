@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  api:
+    image: car_report_app
+    container_name: car_report_api
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: development
+    depends_on:
+      - redis
+
+  celery:
+    image: car_report_app
+    container_name: car_report_celery
+    command: celery -A app.tasks.celery_app.celery worker --loglevel=info
+    environment:
+    - CELERY_BROKER_URL=redis://redis:6379/0
+    - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7
+    container_name: car_report_redis
+    ports:
+      - "6379:6379"
