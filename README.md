@@ -8,7 +8,7 @@
 
 ## Code structure
 asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects$ tree -L 4
-.
+```
 ├── app
 │   ├── __init__.py
 │   ├── models
@@ -59,7 +59,7 @@ asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects$ tree -L 4
 │   └── worker.cpython-312.pyc
 ├── README.md
 └── requirements.txt
-
+```
 15 directories, 36 files
 
 ## How to run
