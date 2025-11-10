@@ -68,3 +68,20 @@ asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects$ tree -L 4
 3. Activate venv, install requirements.
 4. Run Flask: `python run.py`
 5. Start Celery worker : `celery -A worker.celery worker --beat --loglevel=info`
+
+## Docker Setup for Car Report Project
+1. Install docker desktop 
+2. Create dockerfile using python 3.12 slim as base image , copy requirements and install dependencies 
+3. For creating multi-container application , use docker compose and defien services, images and containers 
+4. Services=3
+API – Flask application running on port 5000, uses image car-report-app
+Celery – Background worker for asynchronous tasks., uses same image
+Redis – In-memory data store used by Celery as a broker and result backend, uses official builtin redis image
+5. build and start containers using : 
+                            'docker compose up --build'
+6. Check if containers are running: 
+                            docker ps
+7. to stop containers :
+                            docker compose down
+
+
