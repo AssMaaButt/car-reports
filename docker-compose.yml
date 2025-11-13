@@ -1,29 +1,70 @@
 version: "3.9"
 
 services:
+  # Flask API
   api:
-    image: car_report_app
-    container_name: car_report_api
+    build: .
+    container_name: api
+    command: flask run --host=0.0.0.0 --port=5000
+    volumes:
+      - ./:/app   # <-- local ./app folder is mounted inside container
     ports:
       - "5000:5000"
     environment:
       FLASK_APP: app.py
       FLASK_ENV: development
+      DATABASE_URL: postgresql+psycopg2://car_user:car_pass@db:5432/car_report
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
+      - db
       - redis
 
-  celery:
-    image: car_report_app
-    container_name: car_report_celery
-    command: celery -A app.tasks.celery_app.celery worker --loglevel=info
+  # Celery Worker (executes tasks)
+  celery_worker:
+    build: .
+    container_name: worker
+    command: ./scripts/worker.sh
     environment:
-    - CELERY_BROKER_URL=redis://redis:6379/0
-    - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      DATABASE_URL: postgresql+psycopg2://car_user:car_pass@db:5432/car_report
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
+      - db
       - redis
 
+  # Celery Beat (schedules periodic tasks)
+  celery_beat:
+    build: .
+    container_name: beat
+    command: ./scripts/beat.sh
+    environment:
+      DATABASE_URL: postgresql+psycopg2://car_user:car_pass@db:5432/car_report
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  # Redis (Message broker for Celery)
   redis:
     image: redis:7
-    container_name: car_report_redis
+    container_name: redis
     ports:
       - "6379:6379"
+
+  # PostgreSQL Database
+  db:
+    image: postgres:16
+    container_name: db
+    environment:
+      POSTGRES_USER: car_user
+      POSTGRES_PASSWORD: car_pass
+      POSTGRES_DB: car_report
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

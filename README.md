@@ -7,8 +7,8 @@
 - Periodic background sync from Back4App (2012-2022) using Celery + Redis.
 
 ## Code structure
-asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects$ tree -L 4
 ```
+.
 ├── app
 │   ├── __init__.py
 │   ├── models
@@ -39,6 +39,10 @@ asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects$ tree -L 4
 │       ├── cars
 │       │   ├── api.py
 │       │   ├── __pycache__
+│       │   │   ├── api.cpython-312.pyc
+│       │   │   ├── cars_api.cpython-312.pyc
+│       │   │   ├── car_schema.cpython-312.pyc
+│       │   │   └── schemas.cpython-312.pyc
 │       │   └── schemas.py
 │       ├── __init__.py
 │       ├── __pycache__
@@ -48,19 +52,38 @@ asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects$ tree -L 4
 │       └── users
 │           ├── api.py
 │           ├── __pycache__
+│           │   ├── api.cpython-312.pyc
+│           │   ├── schemas.cpython-312.pyc
+│           │   ├── users_api.cpython-312.pyc
+│           │   └── user_schemas.cpython-312.pyc
 │           └── schemas.py
-├── app.db
 ├── app.py
 ├── config.py
+├── docker-compose.yml
+├── Dockerfile
 ├── flask car commands .txt
 ├── instance
+├── migrations
+│   ├── alembic.ini
+│   ├── env.py
+│   ├── __pycache__
+│   │   └── env.cpython-312.pyc
+│   ├── README
+│   ├── script.py.mako
+│   └── versions
+│       ├── 2aa0de476bf0_initial_migration.py
+│       └── __pycache__
+│           └── 2aa0de476bf0_initial_migration.cpython-312.pyc
 ├── __pycache__
 │   ├── config.cpython-312.pyc
 │   └── worker.cpython-312.pyc
 ├── README.md
-└── requirements.txt
-```
-15 directories, 36 files
+├── requirements.txt
+└── scripts
+    ├── beat.sh
+    └── worker.sh
+
+20 directories, 54 files
 
 ## How to run
 1. Copy .env.example -> .env and update as needed.
@@ -91,5 +114,4 @@ asma@asma-HP-ZBook-Fury-15-G7-Mobile-Workstation:~/Documents/projects$ tree -L 4
 3. **Stop and remove containers**  
    ```bash
    docker compose down
-
 

@@ -12,7 +12,7 @@ class Config:
     FLASK_DEBUG = os.getenv("FLASK_DEBUG", True)
 
     # Database configuration
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///app.db")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "postgresql+psycopg2://car_user:car_pass@localhost:5432/car_report")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # JWT configuration

@@ -52,10 +52,30 @@ step 3: create flask app structure
         sudo systemctl enable redis
 6. Terminal 3: 
         celery -A app.tasks.celery_app.celery worker --loglevel=info
-7. terminal 4 :
+7. terminal 4 : for manuall synching
         celery -A app.tasks.celery_app.celery call sync_from_back4app
+8. terminal 5 for celery beat :
+        celery -A app.tasks.periodic:celery beat
 
 
+Database connection: 
+   1. install postgres
+   2. sudo -u postgres psql   // open postgres shell 
+   3. CREATE DATABASE car_report;
+                CREATE USER car_user WITH PASSWORD 'car_pass';
+                ALTER ROLE car_user SET client_encoding TO 'utf8';
+                ALTER ROLE car_user SET default_transaction_isolation TO 'read committed';
+                ALTER ROLE car_user SET timezone TO 'UTC';
+                GRANT ALL PRIVILEGES ON DATABASE car_report TO car_user;
+                \q
 
 
-
+Migrations are a way to automatically create and update tables in your database based on your SQLAlchemy models.
+        1. install Migrations
+        2. terminal:export FLASK_APP=app
+                flask db init
+        This will create a migrations/ folder in your project.
+        3. Generate a migration from your models,Run migrations inside the Docker container
+                docker exec -it api bash
+                flask db migrate -m "create users and cars tables"
+                flask db upgrade

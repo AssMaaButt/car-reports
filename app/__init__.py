@@ -3,11 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
 from config import Config
+from flask_migrate import Migrate
 
 # Initialize extensions
 db = SQLAlchemy()
 jwt = JWTManager()
 ma = Marshmallow()
+migrate = Migrate()  # Initialize migrate
 
 def create_app():
     """Application factory pattern."""
@@ -18,7 +20,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     ma.init_app(app)
-
+    migrate.init_app(app, db)  # Connect migrations to your app and db
     # Register blueprints (web)
     from app.web import main_bp
     from app.web.users.api import users_bp

@@ -1,40 +1,58 @@
 # app/tasks/celery_app.py
-from app import create_app
+from datetime import timedelta
 from celery import Celery
-from celery.schedules import crontab
+from celery.signals import worker_ready
+from celery_singleton import clear_locks
 
-app = create_app()
+from app import create_app
 
-def make_celery(app):
-    """Initialize Celery with Flask app context."""
-    celery = Celery(
-        app.import_name,
-        broker=app.config.get("CELERY_BROKER_URL"),
-        backend=app.config.get("CELERY_RESULT_BACKEND")
-    )
-    celery.conf.update(app.config)
+# ----------------------------
+# 1. Initialize Flask app
+# ----------------------------
+flask_app = create_app()
 
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
+# ----------------------------
+# 2. Initialize Celery
+# ----------------------------
+celery = Celery(
+    "celery",
+    broker=flask_app.config.get("CELERY_BROKER_URL"),
+    backend=flask_app.config.get("CELERY_RESULT_BACKEND"),
+    broker_connection_retry_on_startup=True,
+    include=[
+        "app.tasks.fetch_and_store_cars_task",
+    ],
+)
 
-    celery.Task = ContextTask
-    return celery
+# Ensure tasks run within Flask app context
+class ContextTask(celery.Task):
+    def __call__(self, *args, **kwargs):
+        with flask_app.app_context():
+            return self.run(*args, **kwargs)
 
-celery = make_celery(app)
+celery.Task = ContextTask
 
-# Periodic task
-@celery.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(
-        crontab(hour=2, minute=0),
-        sync_from_back4app.s(),
-        name="daily-sync"
-    )
-
-# Celery task
+# ----------------------------
+# 3. Define tasks
+# ----------------------------
 @celery.task(name="sync_from_back4app")
 def sync_from_back4app():
-    from app.tasks.fetch_and_store_cars_task import fetch_and_store_cars
+    from .fetch_and_store_cars_task import fetch_and_store_cars
     return fetch_and_store_cars()
+
+# ----------------------------
+# 4. Set up periodic tasks (timedelta style)
+# ----------------------------
+celery.conf.beat_schedule = {
+    "daily_sync_from_back4app": {
+        "task": "sync_from_back4app",
+        "schedule": timedelta(minutes=1),  
+    }
+}
+
+# ----------------------------
+# 5. Unlock singleton locks on worker start
+# ----------------------------
+@worker_ready.connect
+def unlock_all(**kwargs):
+    clear_locks(celery)
