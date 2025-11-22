@@ -1,21 +1,26 @@
-# app/tasks/fetch_and_store_cars_task.py
+import os
 import requests
 from datetime import datetime
-from flask import current_app
 from app.models.car import Car
-from app import db
 
-def fetch_and_store_cars():
+def fetch_and_store_cars(db):
     """
     Fetch data from Back4App and upsert into local DB.
     Keeps only cars with year in [2012, 2022].
     """
-    app = current_app._get_current_object()
+
+    # Read config from environment variables
+    BACK4APP_APP_ID = os.getenv("BACK4APP_APP_ID")
+    BACK4APP_REST_KEY = os.getenv("BACK4APP_REST_KEY")
+    BACK4APP_URL = os.getenv(
+        "BACK4APP_URL",
+        "https://parseapi.back4app.com/classes/Car_Model_List"
+    )
+
     headers = {
-        "X-Parse-Application-Id": app.config.get("BACK4APP_APP_ID"),
-        "X-Parse-REST-API-Key": app.config.get("BACK4APP_REST_KEY"),
+        "X-Parse-Application-Id": BACK4APP_APP_ID,
+        "X-Parse-REST-API-Key": BACK4APP_REST_KEY,
     }
-    url = app.config.get("BACK4APP_URL", "https://parseapi.back4app.com/classes/Car_Model_List")
 
     limit = 1000
     skip = 0
@@ -23,10 +28,10 @@ def fetch_and_store_cars():
 
     while True:
         params = {"limit": limit, "skip": skip}
-        resp = requests.get(url, headers=headers, params=params, timeout=30)
+        resp = requests.get(BACK4APP_URL, headers=headers, params=params, timeout=30)
 
         if resp.status_code != 200:
-            app.logger.error("Back4App fetch failed: %s", resp.text)
+            print(f"Back4App fetch failed: {resp.text}")
             break
 
         data = resp.json()
@@ -48,7 +53,7 @@ def fetch_and_store_cars():
             if year and not (2012 <= year <= 2022):
                 continue
 
-            car = Car.query.filter_by(external_id=external_id).first() if external_id else None
+            car = db.query(Car).filter_by(external_id=external_id).first() if external_id else None
 
             if car:
                 updated = False
@@ -63,16 +68,16 @@ def fetch_and_store_cars():
                     updated = True
                 if updated:
                     car.updated_at = datetime.utcnow()
-                    db.session.add(car)
+                    db.add(car)
             else:
                 new_car = Car(make=make or "Unknown", model=model, year=year, external_id=external_id)
-                db.session.add(new_car)
+                db.add(new_car)
                 total_inserted += 1
 
-        db.session.commit()
+        db.commit()
         if len(results) < limit:
             break
         skip += limit
 
-    app.logger.info("fetch_and_store_cars: inserted=%d", total_inserted)
+    print(f"fetch_and_store_cars: inserted={total_inserted}")
     return {"inserted": total_inserted}

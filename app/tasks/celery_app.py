@@ -1,57 +1,52 @@
-# app/tasks/celery_app.py
 from datetime import timedelta
+import os
 from celery import Celery
 from celery.signals import worker_ready
 from celery_singleton import clear_locks
 
-from app import create_app
+# Import SQLAlchemy session and your task
+from app.db import SessionLocal
+from app.tasks.fetch_and_store_cars_task import fetch_and_store_cars
 
 # ----------------------------
-# 1. Initialize Flask app
-# ----------------------------
-flask_app = create_app()
-
-# ----------------------------
-# 2. Initialize Celery
+# 1. Initialize Celery
 # ----------------------------
 celery = Celery(
     "celery",
-    broker=flask_app.config.get("CELERY_BROKER_URL"),
-    backend=flask_app.config.get("CELERY_RESULT_BACKEND"),
+    broker=os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0"),
+    backend=os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0"),
     broker_connection_retry_on_startup=True,
     include=[
         "app.tasks.fetch_and_store_cars_task",
     ],
 )
 
-# Ensure tasks run within Flask app context
-class ContextTask(celery.Task):
-    def __call__(self, *args, **kwargs):
-        with flask_app.app_context():
-            return self.run(*args, **kwargs)
-
-celery.Task = ContextTask
-
 # ----------------------------
-# 3. Define tasks
+# 2. Define tasks
 # ----------------------------
 @celery.task(name="sync_from_back4app")
 def sync_from_back4app():
-    from .fetch_and_store_cars_task import fetch_and_store_cars
-    return fetch_and_store_cars()
+    """
+    Calls fetch_and_store_cars function with a DB session.
+    """
+    db = SessionLocal()
+    try:
+        return fetch_and_store_cars(db)
+    finally:
+        db.close()
 
 # ----------------------------
-# 4. Set up periodic tasks (timedelta style)
+# 3. Set up periodic tasks
 # ----------------------------
 celery.conf.beat_schedule = {
     "daily_sync_from_back4app": {
         "task": "sync_from_back4app",
-        "schedule": timedelta(minutes=1),  
+        "schedule": timedelta(minutes=10),  # Adjust as needed
     }
 }
 
 # ----------------------------
-# 5. Unlock singleton locks on worker start
+# 4. Unlock singleton locks on worker start
 # ----------------------------
 @worker_ready.connect
 def unlock_all(**kwargs):

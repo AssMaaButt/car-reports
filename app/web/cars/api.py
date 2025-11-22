@@ -1,46 +1,52 @@
-# app/web/cars/cars_api.py
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+from typing import Optional, List
 
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from app.db import get_db
 from app.models.car import Car
-from app.web.cars.schemas import CarSchema
-from app import db
+from app.web.cars.schemas import CarRead
 
-# Blueprint for car-related routes
-cars_bp = Blueprint("cars", __name__, url_prefix="/cars")
 
-car_schema = CarSchema()
-cars_schema = CarSchema(many=True)
+router = APIRouter(prefix="/cars", tags=["Cars"])
 
-@cars_bp.route("/", methods=["GET"])
-@jwt_required()
-def list_cars():
-    """List all cars with filters and pagination"""
-    q = Car.query
 
-    # Optional filters
-    make = request.args.get("make")
-    model = request.args.get("model")
-    year = request.args.get("year", type=int)
+@router.get("/", response_model=dict)
+def list_cars(
+    make: Optional[str] = Query(None),
+    model: Optional[str] = Query(None),
+    year: Optional[int] = Query(None),
+    page: int = 1,
+    per_page: int = 20,
+    db: Session = Depends(get_db),
+):
+    """
+    List cars with filters + pagination
+    """
 
+    query = db.query(Car)
+
+    # Filters
     if make:
-        q = q.filter(Car.make.ilike(f"%{make}%"))
+        query = query.filter(Car.make.ilike(f"%{make}%"))
     if model:
-        q = q.filter(Car.model.ilike(f"%{model}%"))
+        query = query.filter(Car.model.ilike(f"%{model}%"))
     if year:
-        q = q.filter_by(year=year)
+        query = query.filter(Car.year == year)
 
-    # Pagination
-    page = request.args.get("page", default=1, type=int)
-    per_page = request.args.get("per_page", default=20, type=int)
-    paginated = q.order_by(Car.year.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    total = query.count()   # total items BEFORE pagination
 
-    # Result structure
-    result = {
-        "total": paginated.total,
-        "page": paginated.page,
-        "per_page": paginated.per_page,
-        "pages": paginated.pages,
-        "items": cars_schema.dump(paginated.items),
+    # Pagination manually
+    items = (
+        query.order_by(Car.year.desc())
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+        .all()
+    )
+
+    return {
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "pages": (total + per_page - 1) // per_page,
+        "items": [CarRead.from_orm(i) for i in items],
     }
-    return jsonify(result), 200

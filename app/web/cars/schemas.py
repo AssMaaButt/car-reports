@@ -1,12 +1,20 @@
-# app/web/cars/car_schema.py
+from pydantic import BaseModel, Field
 
-from marshmallow import fields, validate
-from app import ma
-from app.models.car import Car
+class CarBase(BaseModel):
+    make: str = Field(..., min_length=1)
+    model: str | None = None
+    year: int | None = None
 
-class CarSchema(ma.Schema):
-    id = fields.Int(dump_only=True)
-    make = fields.Str(required=True, validate=validate.Length(min=1))
-    model = fields.Str(allow_none=True)
-    year = fields.Int(allow_none=True)
-    external_id = fields.Str(dump_only=True)
+class CarCreate(CarBase):
+    """Used for POST/PUT requests"""
+    pass
+
+class CarRead(CarBase):
+    """Used for GET responses"""
+    id: int
+    external_id: str | None = None
+
+    # Pydantic v2: replaces orm_mode
+    model_config = {
+        "from_attributes": True
+    }

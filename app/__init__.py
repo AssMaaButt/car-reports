@@ -1,33 +1,12 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
-from flask_marshmallow import Marshmallow
-from config import Config
-from flask_migrate import Migrate
+from fastapi import FastAPI
+from .web.cars.api import router as cars_router
+from .web.users.api import router as users_router
+from .db import init_db
 
-# Initialize extensions
-db = SQLAlchemy()
-jwt = JWTManager()
-ma = Marshmallow()
-migrate = Migrate()  # Initialize migrate
+app = FastAPI(title="Car Report API")
+init_db()
 
-def create_app():
-    """Application factory pattern."""
-    app = Flask(__name__)
-    app.config.from_object(Config)
+# Include routers
 
-    # Initialize extensions
-    db.init_app(app)
-    jwt.init_app(app)
-    ma.init_app(app)
-    migrate.init_app(app, db)  # Connect migrations to your app and db
-    # Register blueprints (web)
-    from app.web import main_bp
-    from app.web.users.api import users_bp
-    from app.web.cars.api import cars_bp
-
-    app.register_blueprint(main_bp)
-    app.register_blueprint(users_bp)
-    app.register_blueprint(cars_bp)
-
-    return app
+app.include_router(cars_router, prefix="/cars", tags=["Cars"])
+app.include_router(users_router, prefix="/users", tags=["Users"])

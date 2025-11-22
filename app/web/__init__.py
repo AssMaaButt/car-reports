@@ -1,13 +1,13 @@
 # app/web/__init__.py
-# This file marks 'web' as a Python package and registers blueprints.
+# This file marks 'web' as a Python package and imports routers.
 
-from flask import Blueprint, jsonify
-from app.web.users.api import users_bp
-from app.web.cars.api import cars_bp
+from fastapi import APIRouter
+from app.web.users.api import router as users_router
+from app.web.cars.api import router as cars_router
 
-# Optional main blueprint for the root endpoint
-main_bp = Blueprint("main", __name__)
+# Main router (optional)
+main_router = APIRouter()
 
-@main_bp.route("/", methods=["GET"])
-def home():
-    return jsonify({"message": "Flask app is running successfully!"}), 200
+@main_router.get("/")
+async def home():
+    return {"message": "FastAPI app is running successfully!"}

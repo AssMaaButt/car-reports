@@ -8,14 +8,15 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install dependencies
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the app
 COPY . .
 
-# Set environment variables
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=development
+# Expose port for FastAPI
+EXPOSE 8000
 
-# Default command (can be overridden in docker-compose)
-CMD ["flask", "run", "--host=0.0.0.0"]
+# Default command to run FastAPI
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+

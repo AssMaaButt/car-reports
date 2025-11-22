@@ -1,18 +1,16 @@
 version: "3.9"
 
 services:
-  # Flask API
+  # FastAPI API
   api:
     build: .
     container_name: api
-    command: flask run --host=0.0.0.0 --port=5000
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ./:/app   # <-- local ./app folder is mounted inside container
+      - ./:/app   # Mount local code
     ports:
-      - "5000:5000"
+      - "8000:8000"
     environment:
-      FLASK_APP: app.py
-      FLASK_ENV: development
       DATABASE_URL: postgresql+psycopg2://car_user:car_pass@db:5432/car_report
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
@@ -20,7 +18,7 @@ services:
       - db
       - redis
 
-  # Celery Worker (executes tasks)
+  # Celery Worker
   celery_worker:
     build: .
     container_name: worker
@@ -33,7 +31,7 @@ services:
       - db
       - redis
 
-  # Celery Beat (schedules periodic tasks)
+  # Celery Beat
   celery_beat:
     build: .
     container_name: beat
@@ -46,7 +44,7 @@ services:
       - db
       - redis
 
-  # Redis (Message broker for Celery)
+  # Redis (Message broker)
   redis:
     image: redis:7
     container_name: redis

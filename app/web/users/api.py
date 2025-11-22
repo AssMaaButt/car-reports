@@ -1,59 +1,62 @@
-# app/web/users/users_api.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
-from flask import Blueprint, request, jsonify
-from app import db
+from app.db import get_db
 from app.models.user import User
-from app.web.users.schemas import SignupSchema, LoginSchema
-from flask_jwt_extended import create_access_token
-from werkzeug.security import check_password_hash
+from app.web.users.schemas import SignupRequest, LoginRequest, UserResponse
+from app.auth.jwt import create_access_token
+from app.auth.password import verify_password, hash_password
 
-# Blueprint for user-related routes
-users_bp = Blueprint("users", __name__, url_prefix="/auth")
-
-signup_schema = SignupSchema()
-login_schema = LoginSchema()
-
-@users_bp.route("/signup", methods=["POST"])
-def signup():
-    """Handle user registration"""
-    payload = request.get_json() or {}
-    errors = signup_schema.validate(payload)
-    if errors:
-        return jsonify({"errors": errors}), 400
-
-    username = payload["username"]
-    email = payload["email"]
-    password = payload["password"]
-
-    # prevent duplicate users
-    if User.query.filter((User.username == username) | (User.email == email)).first():
-        return jsonify({"error": "username or email already exists"}), 409
-
-    user = User(username=username, email=email)
-    user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
-
-    return jsonify({
-        "message": "User created successfully",
-        "user": {"id": user.id, "username": user.username}
-    }), 201
+router = APIRouter(prefix="", tags=["Users"])
 
 
-@users_bp.route("/login", methods=["POST"])
-def login():
-    """Handle user login"""
-    payload = request.get_json() or {}
-    errors = login_schema.validate(payload)
-    if errors:
-        return jsonify({"errors": errors}), 400
+@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def signup(payload: SignupRequest, db: Session = Depends(get_db)):
+    """
+    User registration
+    """
+    # Truncate password to 72 bytes to avoid bcrypt error
+    safe_password = payload.password[:72]
 
-    username = payload["username"]
-    password = payload["password"]
+    # Check duplicates
+    existing = db.query(User).filter(
+        (User.username == payload.username) | (User.email == payload.email)
+    ).first()
 
-    user = User.query.filter_by(username=username).first()
-    if not user or not user.check_password(password):
-        return jsonify({"error": "Invalid credentials"}), 401
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="username or email already exists"
+        )
 
-    access_token = create_access_token(identity=str(user.id))
-    return jsonify({"access_token": access_token}), 200
+    # Create user
+    user = User(
+        username=payload.username,
+        email=payload.email,
+        password_hash=hash_password(safe_password),
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return UserResponse(id=user.id, username=user.username)
+
+
+@router.post("/login")
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    """
+    User login
+    """
+    safe_password = payload.password[:72]  # truncate if necessary
+    user = db.query(User).filter(User.username == payload.username).first()
+
+    if not user or not verify_password(safe_password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
+        )
+
+    token = create_access_token({"sub": str(user.id)})
+
+    return {"access_token": token}

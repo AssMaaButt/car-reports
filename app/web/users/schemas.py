@@ -1,14 +1,20 @@
-# app/web/users/user_schemas.py
+from pydantic import BaseModel, EmailStr, Field
 
-from marshmallow import fields, validate
-from app import ma  # import the Marshmallow instance from your app
-from app.models.user import User  # import the User model
 
-class SignupSchema(ma.Schema):
-    username = fields.Str(required=True, validate=validate.Length(min=3))
-    email = fields.Email(required=True)
-    password = fields.Str(required=True, load_only=True, validate=validate.Length(min=6))
+class SignupRequest(BaseModel):
+    username: str = Field(..., min_length=3)
+    email: EmailStr
+    password: str = Field(..., min_length=6)
 
-class LoginSchema(ma.Schema):
-    username = fields.Str(required=True)
-    password = fields.Str(required=True, load_only=True)
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+
+    class Config:
+        orm_mode = True
