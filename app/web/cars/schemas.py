@@ -5,10 +5,6 @@ class CarBase(BaseModel):
     model: str | None = None
     year: int | None = None
 
-class CarCreate(CarBase):
-    """Used for POST/PUT requests"""
-    pass
-
 class CarRead(CarBase):
     """Used for GET responses"""
     id: int

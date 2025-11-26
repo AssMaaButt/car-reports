@@ -11,16 +11,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Base class for models
 Base = declarative_base()
 
-def init_db():
-    """
-    Initialize database: create tables for all imported models.
-    """
-    # Import all models here so SQLAlchemy knows about them
-    import app.models.user
-    import app.models.car
-
-    Base.metadata.create_all(bind=engine)
-
 # Dependency to use in FastAPI routes
 def get_db():
     """
