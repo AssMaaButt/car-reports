@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional, List
-
+from app.auth.dependencies import get_current_user
 from app.db import get_db
 from app.models.car import Car
 from app.web.cars.schemas import CarRead
@@ -18,6 +18,7 @@ def list_cars(
     page: int = 1,
     per_page: int = 20,
     db: Session = Depends(get_db),
+    current_user: int = Depends(get_current_user)
 ):
     """
     List cars with filters + pagination

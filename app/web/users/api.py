@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
+from app.neo4j_repo import push_user_to_neo4j
 from app.db import get_db
 from app.models.user import User
 from app.web.users.schemas import SignupRequest, LoginRequest, UserResponse
@@ -39,7 +39,7 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
-
+    push_user_to_neo4j(user)
     return UserResponse(id=user.id, username=user.username)
 
 

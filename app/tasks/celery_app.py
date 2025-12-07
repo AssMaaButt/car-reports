@@ -3,6 +3,8 @@ import os
 from celery import Celery
 from celery.signals import worker_ready
 from celery_singleton import clear_locks
+from app.neo4j_repo import push_car_to_neo4j
+
 
 # Import SQLAlchemy session and your task
 from app.db import SessionLocal
@@ -31,7 +33,8 @@ def sync_from_back4app():
     """
     db = SessionLocal()
     try:
-        return fetch_and_store_cars(db)
+        from app.tasks.fetch_and_store_cars_task import fetch_and_store_cars_with_neo4j
+        return fetch_and_store_cars_with_neo4j(db)
     finally:
         db.close()
 

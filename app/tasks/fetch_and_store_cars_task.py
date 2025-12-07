@@ -2,6 +2,9 @@ import os
 import requests
 from datetime import datetime
 from app.models.car import Car
+from app.neo4j_repo import push_car_to_neo4j, push_user_to_neo4j
+from sqlalchemy.orm import Session
+from app.models.user import User
 
 def fetch_and_store_cars(db):
     """
@@ -81,3 +84,25 @@ def fetch_and_store_cars(db):
 
     print(f"fetch_and_store_cars: inserted={total_inserted}")
     return {"inserted": total_inserted}
+
+def fetch_and_store_cars_with_neo4j(db: Session):
+    """
+    Calls the existing fetch_and_store_cars to update Postgres,
+    then pushes each car to Neo4j.
+    """
+    result = fetch_and_store_cars(db)  # this runs your existing code
+
+    # Fetch all cars inserted/updated in this run
+    cars = db.query(Car).all()  
+
+    for car in cars:
+        try:
+            push_car_to_neo4j(car)
+        except Exception as e:
+            print(f"Failed to push car {car.id} to Neo4j: {e}")
+# Sync users
+    users = db.query(User).all()
+    for user in users:
+        push_user_to_neo4j(user)
+
+    return result
