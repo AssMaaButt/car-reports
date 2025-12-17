@@ -1,14 +1,14 @@
 # Flask Car Report
 
-
 ## Overview
-- Flask REST API to manage/search car reports.
-- JWT-based authentication.
-- Periodic background sync from Back4App (2012-2022) using Celery + Redis.
 
-## Code structure
+* Flask REST API to manage/search car reports.
+* JWT-based authentication.
+* Periodic background sync from Back4App (2012–2022) using Celery + Redis.
+
+## Code Structure
+
 ```
-.
 .
 ├── alembic.ini
 ├── app
@@ -30,80 +30,65 @@
 │   ├── models
 │   │   ├── car.py
 │   │   ├── __init__.py
-│   │   ├── __pycache__
 │   │   └── user.py
 │   ├── neo4j_connection.py
 │   ├── neo4j_repo.py
-│   ├── __pycache__
-│   │   ├── db.cpython-312.pyc
-│   │   ├── __init__.cpython-312.pyc
-│   │   ├── models.cpython-312.pyc
-│   │   ├── neo4j_connection.cpython-312.pyc
-│   │   ├── neo4j_repo.cpython-312.pyc
-│   │   ├── routes.cpython-312.pyc
-│   │   ├── schemas.cpython-312.pyc
-│   │   └── tasks.cpython-312.pyc
 │   ├── tasks
 │   │   ├── celery_app.py
-│   │   ├── fetch_and_store_cars_task.py
-│   │   └── __pycache__
+│   │   └── fetch_and_store_cars_task.py
 │   └── web
 │       ├── cars
 │       ├── __init__.py
-│       ├── __pycache__
 │       └── users
 ├── config.py
 ├── docker-compose.yml
 ├── Dockerfile
-├── flask car commands .txt
-├── flask car report 1 mkdir.txt
-├── instance
-├── migrations
-│   ├── env.py
-│   ├── __pycache__
-│   │   └── env.cpython-312.pyc
-│   ├── README
-│   ├── script.py.mako
-│   └── versions
-│       ├── 2aa0de476bf0_initial_migration.py
-│       └── __pycache__
-├── __pycache__
-│   ├── config.cpython-312.pyc
-│   └── worker.cpython-312.pyc
-├── README.md
 ├── requirements.txt
-└── scripts
-    ├── beat.sh
-    └── worker.sh
+├── scripts
+│   ├── beat.sh
+│   └── worker.sh
+└── README.md
+```
 
-23 directories, 43 files
-## How to run
-1. Copy .env.example -> .env and update as needed.
-2. Start Redis.
-3. Activate venv, install requirements.
-4. Run Flask: `python run.py`
-5. **Start Celery worker**  
-   ```bash
-   celery -A worker.celery worker --beat --loglevel=info
 
-## Docker Setup for Car Report Project
-1. Install docker desktop 
-2. Create dockerfile using python 3.12 slim as base image , copy requirements and install dependencies 
-3. For creating multi-container application , use docker compose and defien services, images and containers 
-4. Services=3
-    1. API – Flask application running on port 5000, uses image car-report-app
-    2. Celery – Background worker for asynchronous tasks., uses same image
-    3. Redis – In-memory data store used by Celery as a broker and result backend, uses official builtin redis image
 ### Docker Commands
 
-1. **Build and start containers**  
-   ```bash
-   docker compose up --build
+1. Build and start containers:
 
-2. **Check if containers are running**  
-   ```bash
-   docker ps
-3. **Stop and remove containers**  
-   ```bash
-   docker compose down
+```bash
+docker compose up --build
+```
 
+2. Check running containers:
+
+```bash
+docker ps
+```
+
+3. Stop and remove containers:
+
+```bash
+docker compose down
+```
+
+## Demonstrate Celery Calling MCP
+
+1. Trigger the task manually:
+
+```bash
+sudo docker compose exec celery_worker celery -A app.tasks.celery_app.celery call sync_from_back4app
+```
+
+2. Expected log output on worker container:
+
+```
+worker  | Task sync_from_back4app[<task-id>] received
+worker  | fetch_and_store_cars: inserted=0
+worker  | Task sync_from_back4app[<task-id>] succeeded in <time>s: {'inserted': 0}
+```
+
+3. Explanation:
+
+   * `sync_from_back4app` Celery task internally calls MCP service.
+   * MCP handles the collection and storage of car data.
+   * The `inserted` value indicates how many new records were added.
