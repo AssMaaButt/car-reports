@@ -9,20 +9,37 @@
 ## Code structure
 ```
 .
+.
+├── alembic.ini
 ├── app
+│   ├── auth
+│   │   ├── dependencies.py
+│   │   ├── jwt.py
+│   │   ├── password.py
+│   │   └── __pycache__
+│   ├── db.py
 │   ├── __init__.py
+│   ├── llm
+│   │   ├── agent.py
+│   │   ├── agent_tools.py
+│   │   ├── anthropic_client.py
+│   │   └── __pycache__
+│   ├── mcp
+│   │   ├── client.py
+│   │   └── server.py
 │   ├── models
 │   │   ├── car.py
 │   │   ├── __init__.py
 │   │   ├── __pycache__
-│   │   │   ├── car.cpython-312.pyc
-│   │   │   ├── __init__.cpython-312.pyc
-│   │   │   ├── models.cpython-312.pyc
-│   │   │   └── user.cpython-312.pyc
 │   │   └── user.py
+│   ├── neo4j_connection.py
+│   ├── neo4j_repo.py
 │   ├── __pycache__
+│   │   ├── db.cpython-312.pyc
 │   │   ├── __init__.cpython-312.pyc
 │   │   ├── models.cpython-312.pyc
+│   │   ├── neo4j_connection.cpython-312.pyc
+│   │   ├── neo4j_repo.cpython-312.pyc
 │   │   ├── routes.cpython-312.pyc
 │   │   ├── schemas.cpython-312.pyc
 │   │   └── tasks.cpython-312.pyc
@@ -30,41 +47,18 @@
 │   │   ├── celery_app.py
 │   │   ├── fetch_and_store_cars_task.py
 │   │   └── __pycache__
-│   │       ├── celery_app.cpython-312.pyc
-│   │       ├── fetch_and_store_cars.cpython-312.pyc
-│   │       ├── fetch_and_store_cars_task.cpython-312.pyc
-│   │       ├── tasks.cpython-312.pyc
-│   │       └── worker.cpython-312.pyc
 │   └── web
 │       ├── cars
-│       │   ├── api.py
-│       │   ├── __pycache__
-│       │   │   ├── api.cpython-312.pyc
-│       │   │   ├── cars_api.cpython-312.pyc
-│       │   │   ├── car_schema.cpython-312.pyc
-│       │   │   └── schemas.cpython-312.pyc
-│       │   └── schemas.py
 │       ├── __init__.py
 │       ├── __pycache__
-│       │   ├── auth_routes.cpython-312.pyc
-│       │   ├── car_routes.cpython-312.pyc
-│       │   └── __init__.cpython-312.pyc
 │       └── users
-│           ├── api.py
-│           ├── __pycache__
-│           │   ├── api.cpython-312.pyc
-│           │   ├── schemas.cpython-312.pyc
-│           │   ├── users_api.cpython-312.pyc
-│           │   └── user_schemas.cpython-312.pyc
-│           └── schemas.py
-├── app.py
 ├── config.py
 ├── docker-compose.yml
 ├── Dockerfile
 ├── flask car commands .txt
+├── flask car report 1 mkdir.txt
 ├── instance
 ├── migrations
-│   ├── alembic.ini
 │   ├── env.py
 │   ├── __pycache__
 │   │   └── env.cpython-312.pyc
@@ -73,7 +67,6 @@
 │   └── versions
 │       ├── 2aa0de476bf0_initial_migration.py
 │       └── __pycache__
-│           └── 2aa0de476bf0_initial_migration.cpython-312.pyc
 ├── __pycache__
 │   ├── config.cpython-312.pyc
 │   └── worker.cpython-312.pyc
@@ -83,8 +76,7 @@
     ├── beat.sh
     └── worker.sh
 
-20 directories, 54 files
-
+23 directories, 43 files
 ## How to run
 1. Copy .env.example -> .env and update as needed.
 2. Start Redis.
