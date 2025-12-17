@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from typing import Optional
 
-SECRET_KEY = "your-secret-key"  # move to config.py/env variables in production
+SECRET_KEY = "your-secret-key"  
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60  # 1 hour
+ACCESS_TOKEN_EXPIRE_MINUTES = 60  
 
 
 def create_access_token(data: dict, expires_minutes: Optional[int] = None) -> str:

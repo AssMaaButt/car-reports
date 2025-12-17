@@ -12,7 +12,7 @@ def fetch_and_store_cars(db):
     Keeps only cars with year in [2012, 2022].
     """
 
-    # Read config from environment variables
+    
     BACK4APP_APP_ID = os.getenv("BACK4APP_APP_ID")
     BACK4APP_REST_KEY = os.getenv("BACK4APP_REST_KEY")
     BACK4APP_URL = os.getenv(
@@ -90,9 +90,9 @@ def fetch_and_store_cars_with_neo4j(db: Session):
     Calls the existing fetch_and_store_cars to update Postgres,
     then pushes each car to Neo4j.
     """
-    result = fetch_and_store_cars(db)  # this runs your existing code
+    result = fetch_and_store_cars(db) 
 
-    # Fetch all cars inserted/updated in this run
+    
     cars = db.query(Car).all()  
 
     for car in cars:
@@ -100,7 +100,7 @@ def fetch_and_store_cars_with_neo4j(db: Session):
             push_car_to_neo4j(car)
         except Exception as e:
             print(f"Failed to push car {car.id} to Neo4j: {e}")
-# Sync users
+
     users = db.query(User).all()
     for user in users:
         push_user_to_neo4j(user)

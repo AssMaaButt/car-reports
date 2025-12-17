@@ -1,22 +1,42 @@
 version: "3.9"
 
 services:
-  # FastAPI API
+  
   api:
     build: .
     container_name: api
     command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ./:/app   # Mount local code
+      - ./:/app   
     ports:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+psycopg2://car_user:car_pass@db:5432/car_report
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:
       - db
       - redis
+   
+  
+  mcp:
+    build: .
+    container_name: mcp
+    command: python -u -m app.mcp.server
+    ports:
+      - "5000:5000"   
+    environment:
+      DATABASE_URL: postgresql+psycopg2://car_user:car_pass@db:5432/car_report
+      BACK4APP_APP_ID: ${BACK4APP_APP_ID}
+      BACK4APP_REST_KEY: ${BACK4APP_REST_KEY}
+      BACK4APP_URL: ${BACK4APP_URL}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: test12345
+    depends_on:
+      - db
+      - neo4j
 
   # Celery Worker
   celery_worker:
@@ -27,9 +47,12 @@ services:
       DATABASE_URL: postgresql+psycopg2://car_user:car_pass@db:5432/car_report
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      MCP_SERVER_HOST: mcp
+      MCP_SERVER_PORT: 5000
     depends_on:
       - db
       - redis
+      - mcp
 
   # Celery Beat
   celery_beat:
@@ -43,8 +66,9 @@ services:
     depends_on:
       - db
       - redis
+      - mcp
 
-  # Redis (Message broker)
+  # Redis 
   redis:
     image: redis:7
     container_name: redis
@@ -60,7 +84,7 @@ services:
       POSTGRES_PASSWORD: car_pass
       POSTGRES_DB: car_report
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
